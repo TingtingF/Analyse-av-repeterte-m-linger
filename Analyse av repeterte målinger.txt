@@ -1,5 +1,6 @@
 ﻿* Analyse av repeterte målinger med Stata
  
+ ## These data stem from a randomised study of exercise with respect to maximum oxygen uptakea. The variables have the following meaning: "ID"=patient identifier, "grp"=treatment group (1=control, 2=high intensity exercise), "age"=patient age (years), "sex"=patient sex (1=men, 2=women). With long format, "time"= time point (1=baseline, 2=immediately post exercise, 3=6 months post exercise, 4=30 months post exercise), "vo2" = maximum oxygen uptake (ml/min). With wide format, “vo21” = maximum oxygen uptake (ml/min) at time point 1, “vo22” = maximum oxygen uptake (ml/min) at time point 2, etc. for further time points.
  
 1. Calculate and present descriptive statistics for the predictor variable(s)b 
 and outcome variable(s), for each experimental group.*/
