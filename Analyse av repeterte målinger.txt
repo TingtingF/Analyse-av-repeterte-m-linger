@@ -1,0 +1,511 @@
+﻿* Exam-KLMED8008
+
+1. Calculate and present descriptive statistics for the predictor variable(s)b 
+and outcome variable(s), for each experimental group.*/
+
+Answer:
+
+CODE: bysort grp:summarize vo21 vo22 vo23 vo24 age
+
+*The following tabels shows the mean and standard deviations, minium and maximum 
+value for vo2 and age,accoring to diferent treatment groups.
+-----------------------------------------------------------------------------------------------------------------------------------------------
+-> grp = 1
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+        vo21 |         59    32.24738    6.509945   19.12333   56.43667
+        vo22 |         59    34.68435    7.700773   22.87667   63.05333
+        vo23 |         55    33.96097    6.616058   21.46667   53.00667
+        vo24 |         45    32.64659    7.769164   15.79333   54.91333
+         age |         59    57.69492    9.248027         31         74
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+-> grp = 2
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+        vo21 |         30    31.94111    6.019474      21.46   42.92333
+        vo22 |         30      36.682    8.887111      23.06   53.76667
+        vo23 |         28    35.31643    7.103021      21.53   49.07667
+        vo24 |         24    33.77708    7.103643      21.86   48.47667
+         age |         30    56.83333    10.22533         37         76
+
+
+CODE:bysort grp: tabulate sex
+*The following tabels shows the frequency and percentage for sex accoring to diferent treatment groups.
+-----------------------------------------------------------------------------------------------------------------------------------------------
+-> grp = 1
+
+        sex |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         49       83.05       83.05
+          2 |         10       16.95      100.00
+------------+-----------------------------------
+      Total |         59      100.00
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+-> grp = 2
+
+        sex |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         25       83.33       83.33
+          2 |          5       16.67      100.00
+------------+-----------------------------------
+      Total |         30      100.00
+
+
+2. Describe the levels, nesting, and/or any clustering that might 
+indicate dependency between observations.*/
+
+Answer: There can be dependencies or more correlations regarding vo2 within each subject. 
+ That is each subject can be seen as a cluster. 
+ The covariance matrix and correlations matrix above shows 
+dependency regarding outcome within each subject at different time. 
+And T-test for sample correlation coefficient shows significant correlations 
+regarding outcome within each subject at different time with P value less than 0.05 */
+ cor vo21-vo24, cov mean 
+ 
+    Variable |         Mean    Std. Dev.          Min          Max
+-------------+----------------------------------------------------
+        vo21 |     33.10206     5.941059     21.40667     56.43667
+        vo22 |     36.36454     7.541688     22.87667     63.05333
+        vo23 |     35.46855     6.128577        22.55     53.00667
+        vo24 |     33.03981     7.511227     15.79333     54.91333
+
+
+             |     vo21     vo22     vo23     vo24
+-------------+------------------------------------
+        vo21 |  35.2962
+        vo22 |  40.2649  56.8771
+        vo23 |  30.2661  41.3635  37.5595
+        vo24 |  34.6522  45.2329  36.7331  56.4185
+
+ pwcorr vo21-vo24, star(.05) sig
+              |     vo21     vo22     vo23     vo24
+-------------+------------------------------------
+        vo21 |   1.0000 
+             |
+             |
+        vo22 |   0.9046*  1.0000 
+             |   0.0000
+             |
+        vo23 |   0.8611*  0.8966*  1.0000 
+             |   0.0000   0.0000
+             |
+        vo24 |   0.7765*  0.7985*  0.7980*  1.0000 
+             |   0.0000   0.0000   0.0000
+
+ 
+
+
+3. Obtain relevant graphical plots for the outcome variable(s) 
+as a function of the experimental/predictor variable(s).
+
+Answer:
+* graph the means of outcome variable by treatement group
+CODE:profileplot vo21-vo24, by(grp)
+
+* graph the means of outcome variable by sex group
+CODE:profileplot vo21-vo24, by(sex)
+* graph the means of outcome variable by age
+CODE:gen vo_mean = (vo21+vo22+vo23+vo24)/4
+     sort age
+     generate agecat=autocode(age,4,age[30],age[_N])
+     profileplot vo21-vo24, by(agecat)
+
+4. Some observations are missing. Describe the pattern of missing values and 
+comment on potential consequences. 
+
+Answer:
+* First, determine which variables have a lot of missing values.
+CODE: mdesc
+
+
+    Variable    |     Missing          Total     Percent Missing
+----------------+-----------------------------------------------
+             ID |           0             89           0.00
+           vo21 |           0             89           0.00
+           vo22 |           0             89           0.00
+           vo23 |           6             89           6.74
+           vo24 |          20             89          22.47
+            grp |           0             89           0.00
+            age |           0             89           0.00
+            sex |           0             89           0.00
+         agecat |           0             89           0.00
+----------------+-----------------------------------------------
+
+
+* Obtaining the number of missing values per observation
+* Beginning by investigating how many missing values there are in the variables 
+CODE:misstable summarize
+
+                                                +------------------------------
+               |                                | Unique
+      Variable |     Obs=.     Obs>.     Obs<.  | values        Min         Max
+  -------------+--------------------------------+------------------------------
+          vo23 |         6                  83  |     83   21.46667    53.00667
+          vo24 |        20                  69  |     68   15.79333    54.91333
+  -----------------------------------------------------------------------------
+
+Fomr the table above, we see that vo24  has the most missing
+values (n=20), with vo24  having fewer missing values (n=6)
+
+* Next, examine the patterns of missingness in these two variables. 
+ CODE:misstable patterns vo24 vo23, freq
+ 
+              |   Pattern
+    Frequency |  1  2
+  ------------+-------------
+           69 |  1  1
+              |
+           14 |  1  0
+            6 |  0  0
+  ------------+-------------
+           89 |
+
+ The output from misstable patterns shows, for the specified variables, each pattern of
+missing data which occurs, ordered according to the frequency with which they occur.
+From the first row in the table, we see that there are 69 subjects for whom all
+two variables (vo24 vo23) are observed. The most common
+pattern which has some missing values is when vo23 is observed but
+vo24 is missing (n=14). 
+The missing values may due to lost to follow-up that refers to patients 
+who at one point in time were actively participating in a clinical research trial, 
+but have become lost (either by error in a computer tracking system or by being
+ unreachable) at the point of follow-up in the trial.
+The missing data leads to incompletestudy results, which in turn can put a bias on the result of the study 
+
+
+5. One possible strategy of analysis is to employ a “summary measure model” 
+for the outcome. Suggest and perform such an analysis, and interpret the results.
+
+Answer:
+
+* The summary measure model below shows that there is no signifiant diference 
+in vo2 at the fourth time point between control and treatment group, P>0.05.
+CODE:ttest vo24, by (grp)
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. Err.   Std. Dev.   [95% Conf. Interval]
+---------+--------------------------------------------------------------------
+       1 |      45    32.64659    1.158159    7.769164    30.31248    34.98071
+       2 |      24    33.77708    1.450025    7.103643    30.77748    36.77669
+---------+--------------------------------------------------------------------
+combined |      69    33.03981    .9042454    7.511227    31.23541     34.8442
+---------+--------------------------------------------------------------------
+    diff |           -1.130491    1.907679               -4.938235    2.677253
+------------------------------------------------------------------------------
+    diff = mean(1) - mean(2)                                      t =  -0.5926
+Ho: diff = 0                                     degrees of freedom =       67
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.2777         Pr(|T| > |t|) = 0.5554          Pr(T > t) = 0.7223
+
+
+* The summary measure model shows that there is no signifiant diference 
+in vo2 at the 3rd time point between control and treatment group, P>0.05. 
+ CODE:ttest vo23, by (grp)
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. Err.   Std. Dev.   [95% Conf. Interval]
+---------+--------------------------------------------------------------------
+       1 |      55    33.96097     .892109    6.616058     32.1724    35.74954
+       2 |      28    35.31643    1.342345    7.103021    32.56216    38.07069
+---------+--------------------------------------------------------------------
+combined |      83    34.41823     .743274    6.771549    32.93962    35.89684
+---------+--------------------------------------------------------------------
+    diff |           -1.355459    1.574539               -4.488298     1.77738
+------------------------------------------------------------------------------
+    diff = mean(1) - mean(2)                                      t =  -0.8609
+Ho: diff = 0                                     degrees of freedom =       81
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.1959         Pr(|T| > |t|) = 0.3919          Pr(T > t) = 0.8041
+
+* The summary measure model shows that there is no signifiant diference 
+ in vo2 at the 2nd time point between control and treatment group, P>0.05.
+ CODE:ttest vo22, by (grp)
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. Err.   Std. Dev.   [95% Conf. Interval]
+---------+--------------------------------------------------------------------
+       1 |      59    34.68435    1.002555    7.700773    32.67752    36.69118
+       2 |      30      36.682    1.622557    8.887111     33.3635     40.0005
+---------+--------------------------------------------------------------------
+combined |      89    35.35772    .8612439    8.124958    33.64617    37.06926
+---------+--------------------------------------------------------------------
+    diff |            -1.99765    1.819802               -5.614704    1.619405
+------------------------------------------------------------------------------
+    diff = mean(1) - mean(2)                                      t =  -1.0977
+Ho: diff = 0                                     degrees of freedom =       87
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.1377         Pr(|T| > |t|) = 0.2754          Pr(T > t) = 0.8623
+
+* The summary measure model shows that there is no signifiant diference 
+in vo2 at the 1st time point between control and treatment group, P>0.05.
+CODE:ttest vo21, by (grp)
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. Err.   Std. Dev.   [95% Conf. Interval]
+---------+--------------------------------------------------------------------
+       1 |      59    32.24738    .8475227    6.509945    30.55088    33.94388
+       2 |      30    31.94111    1.099001    6.019474     29.6934    34.18882
+---------+--------------------------------------------------------------------
+combined |      89    32.14414    .6695113    6.316157    30.81363    33.47466
+---------+--------------------------------------------------------------------
+    diff |            .3062686    1.424058                 -2.5242    3.136737
+------------------------------------------------------------------------------
+    diff = mean(1) - mean(2)                                      t =   0.2151
+Ho: diff = 0                                     degrees of freedom =       87
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.5849         Pr(|T| > |t|) = 0.8302          Pr(T > t) = 0.4151
+
+* The summary measure model shows that there is signifiant diference 
+ in the changes between the last time point and the first time point
+between control and treatment group, P<0.05, when we assume that 
+the The null hypothesis (H0) for a one tailed test is that the mean of changes 
+of vo2 is less than 0.
+
+CODE: gen diff = vo24-vo21
+      ttest diff, by (grp)
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. Err.   Std. Dev.   [95% Conf. Interval]
+---------+--------------------------------------------------------------------
+       1 |      45   -.8372312    .6714638    4.504316   -2.190478    .5160152
+       2 |      24    1.390833    1.001345    4.905569   -.6806067    3.462273
+---------+--------------------------------------------------------------------
+combined |      69   -.0622522    .5699003    4.733948   -1.199471    1.074966
+---------+--------------------------------------------------------------------
+    diff |           -2.228065    1.174326                -4.57203    .1159009
+------------------------------------------------------------------------------
+    diff = mean(1) - mean(2)                                      t =  -1.8973
+Ho: diff = 0                                     degrees of freedom =       67
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.0310         Pr(|T| > |t|) = 0.0621          Pr(T > t) = 0.9690
+
+
+6. State a linear regression model using only the experimental/predictor 
+variable(s) as explanatory variable(s); without taking any nesting/clustering 
+into consideration. Estimate the parameters of the model and interpret them.
+
+Answer:
+
+CODE:use vo2_l.dta
+regress vo2 i.grp age i.sex
+
+      Source |       SS           df       MS      Number of obs   =       330
+-------------+----------------------------------   F(3, 326)       =     25.60
+       Model |  3326.47735         3  1108.82578   Prob > F        =    0.0000
+    Residual |  14121.2581       326  43.3167426   R-squared       =    0.1907
+-------------+----------------------------------   Adj R-squared   =    0.1832
+       Total |  17447.7355       329  53.0326306   Root MSE        =    6.5815
+
+------------------------------------------------------------------------------
+         vo2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       2.grp |   .8222835     .76583     1.07   0.284    -.6843089    2.328876
+         age |  -.1748478   .0388729    -4.50   0.000    -.2513211   -.0983744
+       2.sex |  -6.508073   .9841314    -6.61   0.000    -8.444123   -4.572023
+       _cons |   44.59763   2.263673    19.70   0.000     40.14438    49.05089
+------------------------------------------------------------------------------
+
+*The resutls table shows that there is no significant differences in the mean of the 
+response variable (vo2) between control and treatment groups while holding other predictors 
+in the model constant, p=0.284.
+Every additional year in age corresponds to a decreased of 0.17 unit in the mean of the 
+response variable (vo2)while holding other predictors in the model constant,p<0.05.
+Compared to men, the mean in the response variable (vo2)decreases by 
+6.51 for women while holding other predictors in the model constant,p<0.05.*
+
+CODE:pwcompare grp, bonferroni effects
+------------------------------------------------------------------------------
+             |                            Unadjusted           Unadjusted
+             |   Contrast   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         grp |
+     2 vs 1  |   .8222835     .76583     1.07   0.284    -.6843089    2.328876
+------------------------------------------------------------------------------
+The table above shows that difference of means of vo2 between 2 groups are not significantly different at the 5% significance level.
+
+
+7. Repeat the above analysis, now taking any clustering into consideration 
+ by means of a “robust” model that employs the Huber-White (“sandwich”) 
+ empirical variance/ covariance estimator. Interpret the parameter estimates 
+ and compare with the former model estimates; comment on similarities and differences.
+
+Answer: 
+CODE: regress vo2 i.grp age i.sex, robust cluster( ID )
+ ------------------------------------------------------------------------------
+             |               Robust
+         vo2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       2.grp |   .8222835   1.324439     0.62   0.536    -1.809761    3.454328
+         age |  -.1748478   .0576619    -3.03   0.003    -.2894387   -.0602568
+       2.sex |  -6.508073   1.501519    -4.33   0.000    -9.492027   -3.524119
+       _cons |   44.59763   3.396849    13.13   0.000     37.84711    51.34816
+------------------------------------------------------------------------------
+ The table above shows that parameter estimates by using the Huber-White (“sandwich”) 
+ empirical variance/ covariance estimator is similar as the former model's estimates,
+ but the pairwise comparisons of means of vo2 in the later models shows lager  Std. Err.
+ and wider confidence intervals.
+
+CODE: pwcompare grp, bonferroni effects
+ ------------------------------------------------------------------------------
+             |                            Unadjusted           Unadjusted
+             |   Contrast   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         grp |
+     2 vs 1  |   .8222835   1.324439     0.62   0.536    -1.809761    3.454328
+------------------------------------------------------------------------------
+The table above shows that difference of means of vo2 between 2 groups are not significantly different at the 5% significance level.
+
+
+ 8. Repeat the analysis once more, this time taking any nesting/clustering 
+ into consideration by means of a linear mixed effects model. 
+ Interpret the parameter estimates and compare with the two previous model estimates; 
+ comment on similarities and differences.
+
+Answer:
+From the output, we can see that the estimates of parametors  in the linear
+mixed models are similar that in the earlier models, but the mix models can
+specify random effects at the level identified by the subjuct variable ID, 
+that is, the individual level. That is,these are random effects at the ID level 
+and the variance—covariance matrix can be calculaed in the mixed models.
+The variance of the level-two errors (the ID level), is estimated as 31.68 with standard error 5.22.
+The estimated variance of the overall error term; that is, 11.07.
+This is the variance of the level-one errors, that is, the residuals.
+Finally, a likelihood-ratio test comparing the model with one-level ordinary 
+linear regression, is provided and is highly significant for these data (p<0.05). 
+
+ CODE:mixed vo2 i.grp age i.sex || ID :
+
+ Mixed-effects ML regression                     Number of obs     =        330
+Group variable: ID                              Number of groups  =         89
+
+                                                Obs per group:
+                                                              min =          2
+                                                              avg =        3.7
+                                                              max =          4
+
+                                                Wald chi2(3)      =      28.36
+Log likelihood = -973.55287                     Prob > chi2       =     0.0000
+
+------------------------------------------------------------------------------
+         vo2 |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       2.grp |   .9249337    1.32326     0.70   0.485    -1.668608    3.518475
+         age |  -.1951483   .0667903    -2.92   0.003    -.3260549   -.0642417
+       2.sex |  -6.521259   1.691619    -3.86   0.000    -9.836772   -3.205746
+       _cons |   45.53083   3.894558    11.69   0.000     37.89764    53.16403
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+  Random-effects Parameters  |   Estimate   Std. Err.     [95% Conf. Interval]
+-----------------------------+------------------------------------------------
+ID: Identity                 |
+                  var(_cons) |   31.68318   5.215541      22.94605    43.74715
+-----------------------------+------------------------------------------------
+               var(Residual) |    11.0762   1.008734      9.265525    13.24072
+------------------------------------------------------------------------------
+LR test vs. linear model: chibar2(01) = 228.99        Prob >= chibar2 = 0.0000
+
+CODE:margins i.grp
+
+Predictive margins                              Number of obs     =        330
+
+Expression   : Linear prediction, fixed portion, predict()
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |     Margin   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         grp |
+          1  |   33.25841   .7681834    43.29   0.000      31.7528    34.76402
+          2  |   34.18334   1.076711    31.75   0.000     32.07303    36.29366
+------------------------------------------------------------------------------
+The table above shows predictive margins for the 2 groups:
+1):If all subjects would have been in the control group (keeping
+ keeping everything else constant,), then the average vo2 would have been 33.26.
+2):If all subjects would have been in the treatment group (keeping
+ keeping everything else constant,), then the average vo2 would have been 34.18.
+
+CODE:pwcompare i.grp, bonferroni effects
+
+Pairwise comparisons of marginal linear predictions
+
+Margins      : asbalanced
+
+note: option bonferroni ignored since there is only one comparison
+------------------------------------------------------------------------------
+             |                            Unadjusted           Unadjusted
+             |   Contrast   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+vo2          |
+         grp |
+     2 vs 1  |   .9249337    1.32326     0.70   0.485    -1.668608    3.518475
+------------------------------------------------------------------------------
+The table above shows that difference of means of vo2 between 2 groups are not significantly different at the 5% significance level.
+
+9. Briefly comment on which model (including the summary measure model) 
+that provides the most informative answer to the study question. Comment on the assumptions of the last model.
+
+Answer:
+
+The linear mixed model provides the most informative answer. Other models don't
+condier the dependencies amongst observations, and there can be a correlated 
+observations within a unit or cluster. The linear mixed 
+models dissect hierarchical and / or longitudinal (i.e. time course) data by 
+separating the variance due to random sampling from the main effects. In essence, 
+on top of the fixed effects normally used in classic linear models,linear mixed 
+models resolve i) correlated residuals by introducing random effects that account 
+for differences among random samples, and ii) heterogeneous variance using 
+specific variance functions, thereby improving the estimation accuracy and 
+interpretation of fixed effects in one go.
+
+Assumptions of the linear mixed model : both residuals and random effects 
+should be normally distributed.
+
+10.Assess the normality assumption for any random effect(s) 
+and the residual error term in the last model.
+
+Answer:
+
+* Check residuals
+CODE:predict res, residuals 
+     histogram res, normal xtitle(Predicted level-1 residuals)
+     qnorm res
+     swilk res
+
+                   Shapiro-Wilk W test for normal data
+
+    Variable |        Obs       W           V         z       Prob>z
+-------------+------------------------------------------------------
+         res |        330    0.98637      3.159     2.713    0.00334
+Fomr the output, we see that the P value less than 0.05, it indicates that 
+we can reject the hypothesis that the residulas are normally distributed, which voilate the assumptions.
+
+11. Estimate the intraclass correlation coefficient from the last model, 
+and interpret the result.
+
+ANSWER:
+
+CODE: estat icc
+
+Residual intraclass correlation
+
+------------------------------------------------------------------------------
+                       Level |        ICC   Std. Err.     [95% Conf. Interval]
+-----------------------------+------------------------------------------------
+                          ID |   .7409645   .0369101      .6624158    .8065733
+------------------------------------------------------------------------------
+From the results, we can see that intra-class correlation coefficient is 0.7409645.
+And this indicates that the correlation is high, that means the outcome within 
+subject are more similar than the outcome from different subjects.Therefore, 
+a linear mixed model is necessary.
