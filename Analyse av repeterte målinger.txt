@@ -1,5 +1,6 @@
-﻿* Exam-KLMED8008
-
+﻿* Analyse av repeterte målinger med Stata
+ 
+ 
 1. Calculate and present descriptive statistics for the predictor variable(s)b 
 and outcome variable(s), for each experimental group.*/
 
